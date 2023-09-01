@@ -1,0 +1,49 @@
+spider:
+  # rest template 连接池专用配置，默认路由数量
+  http:
+    default-max-per-route: 200
+    # rest template 连接池专用配置，最大连接数
+    max-total: 400
+    # 链接超时时间
+    connect-timeout-millis: 100000
+    # 请求超时时间
+    connection-request-timeout-millis: 100000
+    # http 并发下载文件配置
+    concurrency:
+      # 最大并发下载线程数
+      max: 200
+      # 单次下载最大等待时间，超时抛出 timeout 异常
+      max-wait-millis: 300000
+      # 最小并发数量
+      min: 1
+      # 等待队列容量
+      queue-capacity: 200
+  # 并发下载文件时，需要配置一些缓存文件信息
+  file:
+    # 缓存文件目录
+    cache-file-path: ./cache
+    # 允许下载的文件类型，只有添加到此处的类型才会允许下载
+    media-types:
+      - application/zip
+      - application/x-rar
+    # 大文件标识，超过此长度的文件标识为大文件，会启动并发下载策略,默认 15mb
+    big-file-size: 15728640
+    # 并发下载时，分片缓存文件大小，默认 15mb
+    share-size: 15728640
+  # 代理类相关配置信息
+  proxy:
+    pool:
+      # 是否启用后进先出策略
+      lifo: false
+      # 代理池允许存在的空闲对象数量
+      max-idle: 64
+      # 代理池允许存在的最少对象数量
+      min-idle: 1
+      # 代理池允许存在的最大对象数量
+      max-total: 64
+      # 当无法获取池内对象时候，最大等待时间
+      max-wait-millis: 15000
+      # 从代理池获取对象时，是否检测对象可用性
+      test-on-borrow: false
+      # 将对象放回代理池时，是否检测对象可用性
+      test-on-return: true
