@@ -1,6 +1,5 @@
 package net.jlxxw.http.spider.file;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,9 +24,9 @@ import org.slf4j.LoggerFactory;
 public class FileInfo {
     private static final Logger logger = LoggerFactory.getLogger(FileInfo.class);
     /**
-     * 临时缓存目录
+     * 默认临时缓存目录
      */
-    private static final String CACHE_PATH = ".";
+    private String cachePath ;
     /**
      * 文件名称
      */
@@ -69,9 +68,7 @@ public class FileInfo {
      * @param length   文件长度
      */
     public FileInfo(String fileName, long length) {
-        this.fileName = fileName;
-        this.length = length;
-        this.bigFile = false;
+        this(fileName,length,0);
     }
 
     /**
@@ -82,6 +79,18 @@ public class FileInfo {
      * @param shareSize 缓存文件数量
      */
     public FileInfo(String fileName, long length, int shareSize) {
+        this(fileName,length,shareSize,"./"+ UUID.randomUUID());
+    }
+
+    /**
+     * 创建一个文件信息
+     *
+     * @param fileName  文件名称
+     * @param length    文件长度
+     * @param shareSize 缓存文件数量
+     * @param cacheFilePath 缓存文件路径
+     */
+    public FileInfo(String fileName, long length, int shareSize,String cacheFilePath) {
         this.fileName = fileName;
         this.length = length;
         this.bigFile = true;
@@ -89,6 +98,7 @@ public class FileInfo {
         for (int i = 0; i < shareSize; i++) {
             cachedFiles.add(null);
         }
+        this.cachePath = cacheFilePath;
     }
 
     public String getRedictUrl() {
@@ -148,51 +158,12 @@ public class FileInfo {
      * @param index 分段位置
      * @throws IOException
      */
-    public void saveBigFile(int index, byte[] data) throws IOException {
-        String path = CACHE_PATH + "/" + UUID.randomUUID().toString();
-        saveBigFile(path, index, data);
-    }
-
-    /**
-     * 存储大文件数据
-     *
-     * @param cacheFilePath 缓存文件路径
-     * @param index         分段位置
-     * @param data          数据内容
-     */
-    public void saveBigFile(String cacheFilePath, int index, byte[] data) throws IOException {
-        cachedFiles.set(index, cacheFilePath);
-        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);) {
-            saveBigFile(cacheFilePath,index,byteArrayInputStream);
-        }
-    }
-
-
-    /**
-     * 存大文件
-     *
-     * @param data  文件数据
-     * @param index 分段位置
-     * @throws IOException
-     */
-    public void saveBigFile(int index, InputStream data) throws IOException {
-        String path = CACHE_PATH + "/temp/" + UUID.randomUUID().toString();
-        saveBigFile(path, index, data);
-    }
-
-    /**
-     * 存储大文件数据
-     *
-     * @param cacheFilePath 缓存文件路径
-     * @param index         分段位置
-     * @param inputStream          数据内容
-     */
-    public void saveBigFile(String cacheFilePath, int index, InputStream inputStream) throws IOException {
-        String filePath = cacheFilePath + "/temp.cache." + index;
-        File file = new File(filePath);
+    public void saveBigFileCache(int index, InputStream data) throws IOException {
+        String path = cachePath + "/" + fileName + "." + index;
+        File file = new File(path);
         FileUtils.createParentDirectories(file);
-        cachedFiles.set(index, filePath);
-        Files.copy(inputStream, Paths.get(filePath));
+        cachedFiles.set(index, path);
+        Files.copy(data, Paths.get(path));
     }
 
     /**
@@ -225,6 +196,8 @@ public class FileInfo {
             file.delete();
             logger.info("合并分段数据文件清理完毕");
         }
+        File cacheDirectory = new File(cachePath);
+        FileUtils.deleteDirectory(cacheDirectory);
         resultFile.close();
         return FileUtils.readFileToByteArray(out);
     }

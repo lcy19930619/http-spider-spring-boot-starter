@@ -81,7 +81,7 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                 };
                 ResponseExtractor<Void> responseExtractor = response -> {
                     InputStream body = response.getBody();
-                    fileInfo.saveBigFile(index, body);
+                    fileInfo.saveBigFileCache(index, body);
                     return null;
                 };
                 header.set(HttpHeaders.RANGE, "bytes=" + start + "-" + end);
