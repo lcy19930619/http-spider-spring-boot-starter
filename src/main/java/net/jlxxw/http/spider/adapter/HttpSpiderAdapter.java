@@ -37,7 +37,7 @@ public class HttpSpiderAdapter implements HttpSpider {
      * @throws IOException
      */
     @Override
-    public FileInfo downloadFile(String url, HttpHeaders headers) throws IOException {
+    public FileInfo downloadFile(String url, HttpHeaders headers) throws Exception {
         return downloadFileTools.download(url, headers);
     }
 

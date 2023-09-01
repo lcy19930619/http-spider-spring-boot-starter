@@ -131,8 +131,8 @@ public class HttpSpiderAutoConfiguration {
     @Bean
     public DownloadFileTools downloadFileTools(ThreadPoolTaskExecutor httpConcurrencyDownloadExecutor,
         BeanFactory beanFactory,
-        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties) {
-        return new DownloadFileTools(httpConcurrencyDownloadExecutor, beanFactory, fileProperties, httpConcurrencyPoolProperties);
+        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,ProxyRestTemplatePool proxyRestTemplatePool) {
+        return new DownloadFileTools(httpConcurrencyDownloadExecutor, beanFactory, fileProperties, httpConcurrencyPoolProperties,proxyRestTemplatePool);
     }
 
     @Bean

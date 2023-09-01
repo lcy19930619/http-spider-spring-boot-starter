@@ -1,5 +1,6 @@
 package net.jlxxw.http.spider.proxy;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import net.jlxxw.http.spider.base.AbstractCookieStore;
@@ -29,7 +30,7 @@ public class MyCookieStore extends AbstractCookieStore {
      * @return all cookies
      */
     @Override public List<Cookie> getCookies() {
-        return null;
+        return new ArrayList<>();
     }
 
     /**

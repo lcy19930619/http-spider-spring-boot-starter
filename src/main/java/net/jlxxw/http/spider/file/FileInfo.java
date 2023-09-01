@@ -188,7 +188,7 @@ public class FileInfo {
      * @param inputStream          数据内容
      */
     public void saveBigFile(String cacheFilePath, int index, InputStream inputStream) throws IOException {
-        String filePath = cacheFilePath + "/temp.cache." + cachedFiles.size();
+        String filePath = cacheFilePath + "/temp.cache." + index;
         File file = new File(filePath);
         FileUtils.createParentDirectories(file);
         cachedFiles.set(index, filePath);

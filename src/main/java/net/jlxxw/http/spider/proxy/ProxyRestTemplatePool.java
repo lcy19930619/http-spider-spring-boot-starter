@@ -48,4 +48,15 @@ public class ProxyRestTemplatePool extends GenericObjectPool<ProxyRestTemplateOb
         }
     }
 
+    /**
+     * 自旋获取对象
+     * @return
+     */
+    public ProxyRestTemplateObject borrow(){
+        try {
+            return borrowObject();
+        }catch(Exception e) {
+            return borrow();
+        }
+    }
 }

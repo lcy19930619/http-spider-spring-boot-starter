@@ -75,7 +75,7 @@ public class MyCookieStore extends AbstractCookieStore {
      * @return all cookies
      */
     @Override public List<Cookie> getCookies() {
-        return null;
+        return new ArrayList<>();
     }
 
     /**

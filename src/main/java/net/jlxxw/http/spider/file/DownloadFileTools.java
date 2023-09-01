@@ -1,6 +1,5 @@
 package net.jlxxw.http.spider.file;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -13,11 +12,10 @@ import java.util.concurrent.TimeUnit;
 import net.jlxxw.http.spider.file.thread.AbstractDownloadFileThread;
 import net.jlxxw.http.spider.properties.FileProperties;
 import net.jlxxw.http.spider.properties.HttpConcurrencyPoolProperties;
-import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
+import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +26,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -53,6 +50,7 @@ public class DownloadFileTools {
 
     private final HttpConcurrencyPoolProperties httpConcurrencyPoolProperties;
 
+    private final ProxyRestTemplatePool proxyRestTemplatePool;
     /**
      * 创建一个默认的下载文件服务
      *
@@ -60,12 +58,13 @@ public class DownloadFileTools {
      * @param beanFactory
      */
     public DownloadFileTools(ThreadPoolTaskExecutor httpDownloadExecutor, BeanFactory beanFactory,
-        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties) {
+        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,ProxyRestTemplatePool proxyRestTemplatePool) {
         this.httpDownloadExecutor = httpDownloadExecutor;
         this.beanFactory = beanFactory;
         this.fileProperties = fileProperties;
         this.maxPoolSize = httpConcurrencyPoolProperties.getMax();
         this.httpConcurrencyPoolProperties = httpConcurrencyPoolProperties;
+        this.proxyRestTemplatePool = proxyRestTemplatePool;
     }
 
     /**
@@ -75,7 +74,7 @@ public class DownloadFileTools {
      * @param httpHeader 要增加的header，如果header存在数据，则进行覆盖
      * @return fileName
      */
-    public FileInfo download(String url, HttpHeaders httpHeader) throws IOException {
+    public FileInfo download(String url, HttpHeaders httpHeader) throws Exception {
 
         //调用head方法,只获取头信息,拿到文件大小
         HttpHeaders responseHeader = readLength(url, httpHeader);
@@ -102,7 +101,6 @@ public class DownloadFileTools {
         int index = 0;
         // 被分配的数据大小
         int totalSize = 0;
-        ProxyRestTemplateObject proxyRestTemplateObject = beanFactory.getBean( ProxyRestTemplateObject.class);
         for (int i = 0; i < threadNum && totalSize < contentLength; ++i) {
             // 累加
             start = i * tempLength;
@@ -110,27 +108,11 @@ public class DownloadFileTools {
             totalSize += tempLength;
             AbstractDownloadFileThread downloadThread;
             if (bigFile) {
-                downloadThread = AbstractDownloadFileThread.bigFileThread(proxyRestTemplateObject.getRestTemplate(), httpHeader, info, index, start, end);
+                downloadThread = AbstractDownloadFileThread.bigFileThread(proxyRestTemplatePool, httpHeader, info, index, start, end);
             } else {
-                downloadThread = AbstractDownloadFileThread.littleFileThread(proxyRestTemplateObject.getRestTemplate(), httpHeader, info);
+                downloadThread = AbstractDownloadFileThread.littleFileThread(proxyRestTemplatePool, httpHeader, info);
             }
-            Future<FileInfo> submit = httpDownloadExecutor.submit(() -> {
-                try {
-                    downloadThread.download();
-                    return info;
-                } catch (HttpHostConnectException | RestClientException e) {
-                    if (proxyRestTemplateObject.isProxy()) {
-                        // 代理地址访问异常,移除代理服务地址
-                        proxyRestTemplateObject.setDelete(true);
-                    }
-                    info.setFail(true);
-                    return null;
-                } catch (Exception e) {
-                    log.error("并发下载文件出现位置异常", e);
-                    info.setFail(true);
-                    return null;
-                }
-            });
+            Future<FileInfo> submit = httpDownloadExecutor.submit(downloadThread);
             downLoadFileThreads.add(submit);
             index += 1;
         }
@@ -263,5 +245,9 @@ public class DownloadFileTools {
         return ((int) (contentLength / fileProperties.getShareSize())) + 1;
     }
 
+
+    private void retry(boolean retry) {
+
+    }
 }
 

@@ -18,7 +18,7 @@ public interface HttpSpider {
      * @return
      * @throws IOException
      */
-    FileInfo downloadFile(String url, HttpHeaders headers) throws IOException;
+    FileInfo downloadFile(String url, HttpHeaders headers) throws Exception;
 
     /**
      * 下载 html 页面

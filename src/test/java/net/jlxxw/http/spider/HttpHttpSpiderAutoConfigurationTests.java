@@ -1,6 +1,5 @@
 package net.jlxxw.http.spider;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import net.jlxxw.http.spider.configuration.HttpSpiderAutoConfiguration;
@@ -33,10 +32,11 @@ public class HttpHttpSpiderAutoConfigurationTests {
 
 
     @Test
-    void download() throws IOException {
+    void download() throws Exception {
         List<String> urls = new ArrayList<String>();
-        urls.add("https://download.jetbrains.com.cn/idea/ideaIU-2023.2.1-aarch64.dmg");
         urls.add("https://www.winrar.com.cn/download/winrar-x64-611scp.exe");
+        urls.add("https://download.jetbrains.com.cn/idea/ideaIU-2023.2.1-aarch64.dmg");
+
         for (String url : urls) {
             FileInfo info = httpSpider.downloadFile(url, new HttpHeaders());
             boolean fail = info.isFail();
