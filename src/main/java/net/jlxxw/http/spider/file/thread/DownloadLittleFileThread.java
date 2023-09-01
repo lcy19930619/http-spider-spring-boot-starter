@@ -55,7 +55,7 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
             try {
                 borrow = proxyRestTemplatePool.borrow();
                 RestTemplate template = borrow.getRestTemplate();
-                ResponseEntity<byte[]> rsp = template.exchange(fileInfo.getRedictUrl(), HttpMethod.GET, new HttpEntity<>(header), byte[].class);
+                ResponseEntity<byte[]> rsp = template.exchange(fileInfo.getRedirectUrl(), HttpMethod.GET, new HttpEntity<>(header), byte[].class);
                 byte[] body = rsp.getBody();
                 fileInfo.saveLittleFile(body);
                 return fileInfo;
@@ -66,7 +66,7 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
                 }
             } catch (Exception e) {
                 i = i+1;
-                logger.error("下载文件产生未知异常,url:"+fileInfo.getRedictUrl()+",正在进行重试,当前次数:" + i ,e);
+                logger.error("下载文件产生未知异常,url:"+fileInfo.getRedirectUrl()+",正在进行重试,当前次数:" + i ,e);
             }finally {
                 if (borrow != null) {
                     proxyRestTemplatePool.returnObject(borrow);

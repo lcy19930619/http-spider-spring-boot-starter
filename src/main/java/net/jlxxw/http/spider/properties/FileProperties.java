@@ -25,7 +25,7 @@ public class FileProperties {
     /**
      * 大文件限制，超过此大小，启动并发下载
      */
-    private int bigFileSize = shareSize;
+    private long bigFileSize = shareSize;
 
     /**
      * 允许下载的文件类型，参考 media 标准定义
@@ -48,11 +48,11 @@ public class FileProperties {
         this.cacheFilePath = cacheFilePath;
     }
 
-    public int getBigFileSize() {
+    public long getBigFileSize() {
         return bigFileSize;
     }
 
-    public void setBigFileSize(int bigFileSize) {
+    public void setBigFileSize(long bigFileSize) {
         this.bigFileSize = bigFileSize;
     }
 

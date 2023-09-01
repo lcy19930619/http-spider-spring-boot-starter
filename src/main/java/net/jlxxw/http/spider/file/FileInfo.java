@@ -26,7 +26,7 @@ public class FileInfo {
     /**
      * 默认临时缓存目录
      */
-    private String cachePath ;
+    private final String cachePath ;
     /**
      * 文件名称
      */
@@ -54,7 +54,7 @@ public class FileInfo {
     /**
      * 文件重定向 url
      */
-    private String redictUrl;
+    private String redirectUrl;
 
     /**
      * 是否下载失败
@@ -68,7 +68,7 @@ public class FileInfo {
      * @param length   文件长度
      */
     public FileInfo(String fileName, long length) {
-        this(fileName,length,0);
+        this(fileName,length,1);
     }
 
     /**
@@ -79,7 +79,7 @@ public class FileInfo {
      * @param shareSize 缓存文件数量
      */
     public FileInfo(String fileName, long length, int shareSize) {
-        this(fileName,length,shareSize,"./"+ UUID.randomUUID());
+        this(fileName,length,shareSize,"./temp/"+ UUID.randomUUID(),shareSize>1);
     }
 
     /**
@@ -90,10 +90,10 @@ public class FileInfo {
      * @param shareSize 缓存文件数量
      * @param cacheFilePath 缓存文件路径
      */
-    public FileInfo(String fileName, long length, int shareSize,String cacheFilePath) {
+    public FileInfo(String fileName, long length, int shareSize,String cacheFilePath,boolean bigFile) {
         this.fileName = fileName;
         this.length = length;
-        this.bigFile = true;
+        this.bigFile = bigFile;
         this.cachedFiles = new ArrayList<>(shareSize);
         for (int i = 0; i < shareSize; i++) {
             cachedFiles.add(null);
@@ -101,12 +101,12 @@ public class FileInfo {
         this.cachePath = cacheFilePath;
     }
 
-    public String getRedictUrl() {
-        return redictUrl;
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 
-    public void setRedictUrl(String redictUrl) {
-        this.redictUrl = redictUrl;
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 
     public String getFileName() {
@@ -132,7 +132,10 @@ public class FileInfo {
                     throw new IllegalStateException("file download failed");
                 }
             }
-            return mergeReadFile(".");
+            if (data != null) {
+                return data;
+            }
+            data =  mergeReadFile(cachePath);
         }
         return data;
     }
@@ -161,6 +164,9 @@ public class FileInfo {
     public void saveBigFileCache(int index, InputStream data) throws IOException {
         String path = cachePath + "/" + fileName + "." + index;
         File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
         FileUtils.createParentDirectories(file);
         cachedFiles.set(index, path);
         Files.copy(data, Paths.get(path));
@@ -179,10 +185,11 @@ public class FileInfo {
         }
         String path = mergeOutPath + "/" + fileName;
         File out = new File(path);
-        if (!out.exists()) {
-            FileUtils.createParentDirectories(out);
-            out.createNewFile();
+        if (out.exists()) {
+            out.delete();
         }
+        FileUtils.createParentDirectories(out);
+        out.createNewFile();
         RandomAccessFile resultFile = new RandomAccessFile(path, "rw");
         logger.info("开始合并分段数据");
         // 合并
@@ -196,10 +203,11 @@ public class FileInfo {
             file.delete();
             logger.info("合并分段数据文件清理完毕");
         }
+        resultFile.close();
+        byte[] bytes = FileUtils.readFileToByteArray(out);
         File cacheDirectory = new File(cachePath);
         FileUtils.deleteDirectory(cacheDirectory);
-        resultFile.close();
-        return FileUtils.readFileToByteArray(out);
+        return bytes;
     }
 
     public boolean isFail() {

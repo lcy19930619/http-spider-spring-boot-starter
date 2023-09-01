@@ -44,7 +44,6 @@ public class DownloadFileTools {
      */
     private final ThreadPoolTaskExecutor httpDownloadExecutor;
 
-    private final BeanFactory beanFactory;
 
     private final FileProperties fileProperties;
 
@@ -60,7 +59,6 @@ public class DownloadFileTools {
     public DownloadFileTools(ThreadPoolTaskExecutor httpDownloadExecutor, BeanFactory beanFactory,
         FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,ProxyRestTemplatePool proxyRestTemplatePool) {
         this.httpDownloadExecutor = httpDownloadExecutor;
-        this.beanFactory = beanFactory;
         this.fileProperties = fileProperties;
         this.maxPoolSize = httpConcurrencyPoolProperties.getMax();
         this.httpConcurrencyPoolProperties = httpConcurrencyPoolProperties;
@@ -92,7 +90,7 @@ public class DownloadFileTools {
 
         List<Future<FileInfo>> downLoadFileThreads = new ArrayList<Future<FileInfo>>(thread);
         //每个线程下载的大小
-        long tempLength = (contentLength - 1) / threadNum + 1;
+        long tempLength = fileProperties.getShareSize();
         // 分片数据的开始位置
         long start;
         // 分片数据的结束位置
@@ -140,7 +138,7 @@ public class DownloadFileTools {
         RequestConfig requestConfig = RequestConfig
             .custom()
             // 从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
-            .setConnectionRequestTimeout(1000)
+            .setConnectionRequestTimeout(10000)
             // 禁止重定向，方便读取 location
             .setRedirectsEnabled(false)
             .build();
@@ -175,9 +173,9 @@ public class DownloadFileTools {
     private long threadNum(long length) {
         long l = length % fileProperties.getShareSize();
         if (l == 0) {
-            return Math.min(length / fileProperties.getShareSize(), maxPoolSize);
+            return length / fileProperties.getShareSize();
         }
-        return Math.min((length / fileProperties.getShareSize()) + 1, maxPoolSize);
+        return (length / fileProperties.getShareSize()) + 1;
     }
 
     /**
@@ -224,11 +222,12 @@ public class DownloadFileTools {
         int share = share(contentLength);
         FileInfo fileInfo;
         if (bigFile) {
-            fileInfo = new FileInfo(fileName, contentLength, share);
+            String cacheFilePath = fileProperties.getCacheFilePath();
+            fileInfo = new FileInfo(fileName, contentLength, share,cacheFilePath, true);
         } else {
             fileInfo = new FileInfo(fileName, contentLength);
         }
-        fileInfo.setRedictUrl(redictUrl);
+        fileInfo.setRedirectUrl(redictUrl);
         return fileInfo;
     }
 
@@ -245,9 +244,5 @@ public class DownloadFileTools {
         return ((int) (contentLength / fileProperties.getShareSize())) + 1;
     }
 
-
-    private void retry(boolean retry) {
-
-    }
 }
 

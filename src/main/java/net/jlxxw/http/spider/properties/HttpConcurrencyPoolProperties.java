@@ -15,11 +15,11 @@ public class HttpConcurrencyPoolProperties {
     /**
      * 并发池最小空闲
      */
-    private int min = 1;
+    private int min = Runtime.getRuntime().availableProcessors();
     /**
      * 并发池最大数量
      */
-    private int max = 200;
+    private int max = min * 5;
     /**
      * 队列容量
      */

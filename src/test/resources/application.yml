@@ -11,7 +11,7 @@ spider:
     # http 并发下载文件配置
     concurrency:
       # 最大并发下载线程数
-      max: 200
+      max: 100
       # 单次下载最大等待时间，超时抛出 timeout 异常
       max-wait-millis: 300000
       # 最小并发数量
@@ -27,9 +27,9 @@ spider:
       - application/zip
       - application/x-rar
     # 大文件标识，超过此长度的文件标识为大文件，会启动并发下载策略,默认 15mb
-    big-file-size: 15728640
+    big-file-size: 357286400
     # 并发下载时，分片缓存文件大小，默认 15mb
-    share-size: 15728640
+    share-size: 357286400
   # 代理类相关配置信息
   proxy:
     pool:

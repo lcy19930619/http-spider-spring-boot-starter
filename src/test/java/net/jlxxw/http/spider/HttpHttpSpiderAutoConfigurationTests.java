@@ -17,7 +17,7 @@ public class HttpHttpSpiderAutoConfigurationTests {
     @Autowired
     private HttpSpider httpSpider;
     @Test
-    void htmlTest() throws Exception {
+    public void htmlTest() throws Exception {
         List<String> urls = new ArrayList<String>();
         urls.add("https://www.huaweicloud.com");
         urls.add("https://www.baidu.com/");
@@ -32,10 +32,10 @@ public class HttpHttpSpiderAutoConfigurationTests {
 
 
     @Test
-    void download() throws Exception {
+    public void download() throws Exception {
         List<String> urls = new ArrayList<String>();
         urls.add("https://www.winrar.com.cn/download/winrar-x64-611scp.exe");
-        urls.add("https://download.jetbrains.com.cn/idea/ideaIU-2023.2.1-aarch64.dmg");
+        urls.add("https://download.jetbrains.com.cn/idea/ideaIU-2023.2.1.tar.gz");
 
         for (String url : urls) {
             FileInfo info = httpSpider.downloadFile(url, new HttpHeaders());

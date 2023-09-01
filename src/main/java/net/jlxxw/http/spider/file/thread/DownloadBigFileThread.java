@@ -84,8 +84,9 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                     fileInfo.saveBigFileCache(index, body);
                     return null;
                 };
+                logger.info("多线程下载:{},index:{}" ,fileInfo.getFileName(),index);
                 header.set(HttpHeaders.RANGE, "bytes=" + start + "-" + end);
-                template.execute(fileInfo.getRedictUrl(), HttpMethod.GET, requestCallback, responseExtractor);
+                template.execute(fileInfo.getRedirectUrl(), HttpMethod.GET, requestCallback, responseExtractor);
                 return fileInfo;
             }catch (ResourceAccessException e) {
                 // 个别ip访问失败者，如果是代理，直接移除
@@ -94,7 +95,7 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                 }
             } catch (Exception e) {
                 i = i+1;
-                logger.error("下载文件产生未知异常,url:"+fileInfo.getRedictUrl()+",正在进行重试,当前次数:" + i ,e);
+                logger.error("下载文件产生未知异常,url:"+fileInfo.getRedirectUrl()+",正在进行重试,当前次数:" + i ,e);
             }finally {
                 if (borrow != null) {
                     proxyRestTemplatePool.returnObject(borrow);
