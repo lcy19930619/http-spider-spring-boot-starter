@@ -3,6 +3,7 @@ package net.jlxxw.http.spider.util;
 import net.jlxxw.http.spider.base.AbstractRateLimiter;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import org.apache.http.HttpHost;
+import org.apache.http.conn.HttpHostConnectException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +33,7 @@ public class HttpUtils {
      * @param <T> 数据类型
      */
     public static <T> ResponseEntity<T> exchange(ProxyRestTemplateObject object, String url, HttpMethod method,
-                                                 @Nullable HttpEntity<?> requestEntity, Class<T> responseType) {
+                                                 @Nullable HttpEntity<?> requestEntity, Class<T> responseType) throws HttpHostConnectException {
         HttpHost host = object.getHost();
         if (abstractRateLimiter != null) {
             abstractRateLimiter.doLimiter(host);
@@ -42,7 +43,7 @@ public class HttpUtils {
     }
 
     public static <T> T  execute(ProxyRestTemplateObject object, String url, HttpMethod method, @Nullable RequestCallback requestCallback,
-                         @Nullable ResponseExtractor<T> responseExtractor){
+                         @Nullable ResponseExtractor<T> responseExtractor) throws HttpHostConnectException {
         HttpHost host = object.getHost();
         if (abstractRateLimiter != null) {
             abstractRateLimiter.doLimiter(host);

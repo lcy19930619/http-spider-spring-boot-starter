@@ -5,12 +5,17 @@ import java.util.function.Consumer;
 import net.jlxxw.http.spider.HttpSpider;
 import net.jlxxw.http.spider.file.DownloadFileTools;
 import net.jlxxw.http.spider.file.FileInfo;
+import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
 import net.jlxxw.http.spider.util.HttpUtils;
+import org.apache.http.conn.HttpHostConnectException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -19,7 +24,7 @@ import org.springframework.web.client.RestTemplate;
  */
 
 public class HttpSpiderAdapter implements HttpSpider {
-
+    private static final Logger logger = LoggerFactory.getLogger(HttpSpiderAdapter.class);
     private final ProxyRestTemplatePool proxyRestTemplatePool;
 
     private final DownloadFileTools downloadFileTools;
@@ -53,9 +58,30 @@ public class HttpSpiderAdapter implements HttpSpider {
      */
     @Override
     public void html(String url, HttpHeaders headers, Consumer<String> htmlConsumer) throws Exception {
-        proxyRestTemplatePool.doExecute((proxy)->{
-            ResponseEntity<String> exchange = HttpUtils.exchange(proxy,url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            htmlConsumer.accept(exchange.getBody());
-        });
+        int i = 0;
+        while ( i < 3) {
+            ProxyRestTemplateObject borrow = null;
+            try {
+                borrow = proxyRestTemplatePool.borrow();
+                ResponseEntity<String> rsp = HttpUtils.exchange(borrow,url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+                htmlConsumer.accept(rsp.getBody());
+            } catch (HttpHostConnectException e) {
+                if ( borrow.isProxy()) {
+                    borrow.setDelete(true);
+                }
+            } catch (HttpClientErrorException e) {
+                // 个别ip访问失败者，如果是代理，直接移除
+                if (borrow != null && borrow.isProxy()) {
+                    borrow.setDelete(true);
+                }
+            } catch (Exception e) {
+                i = i+1;
+                logger.error("下载html文件产生未知异常,url:"+url+",正在进行重试,当前次数:" + i ,e);
+            }finally {
+                if (borrow != null) {
+                    proxyRestTemplatePool.returnObject(borrow);
+                }
+            }
+        }
     }
 }

@@ -1,18 +1,17 @@
 package net.jlxxw.http.spider.file.thread;
 
 import java.io.InputStream;
+
 import net.jlxxw.http.spider.file.FileInfo;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
 import net.jlxxw.http.spider.util.HttpUtils;
+import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RequestCallback;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.ResponseExtractor;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 
 /**
  * 下载大文件线程
@@ -50,9 +49,9 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
 
     private final ProxyRestTemplatePool proxyRestTemplatePool;
 
-    public DownloadBigFileThread( ProxyRestTemplatePool proxyRestTemplatePool, HttpHeaders header, FileInfo fileInfo,
-        int index,
-        long start, long end) {
+    public DownloadBigFileThread(ProxyRestTemplatePool proxyRestTemplatePool, HttpHeaders header, FileInfo fileInfo,
+                                 int index,
+                                 long start, long end) {
         this.header = header;
         this.fileInfo = fileInfo;
         this.index = index;
@@ -70,7 +69,7 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
     @Override
     public FileInfo call() {
         int i = 0;
-        while ( i < MAX_RETRY) {
+        while (i < MAX_RETRY) {
             ProxyRestTemplateObject borrow = null;
             try {
                 borrow = proxyRestTemplatePool.borrow();
@@ -84,19 +83,23 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                     fileInfo.saveBigFileCache(index, body);
                     return null;
                 };
-                logger.info("多线程下载:{},index:{}" ,fileInfo.getFileName(),index);
+                logger.info("多线程下载:{},index:{}", fileInfo.getFileName(), index);
                 header.set(HttpHeaders.RANGE, "bytes=" + start + "-" + end);
-                HttpUtils.execute(borrow,fileInfo.getRedirectUrl(), HttpMethod.GET, requestCallback, responseExtractor);
+                HttpUtils.execute(borrow, fileInfo.getRedirectUrl(), HttpMethod.GET, requestCallback, responseExtractor);
                 return fileInfo;
-            }catch (ResourceAccessException e) {
+            } catch (HttpHostConnectException e) {
+                if (borrow.isProxy()) {
+                    borrow.setDelete(true);
+                }
+            } catch (HttpClientErrorException e) {
                 // 个别ip访问失败者，如果是代理，直接移除
                 if (borrow != null && borrow.isProxy()) {
                     borrow.setDelete(true);
                 }
             } catch (Exception e) {
-                i = i+1;
-                logger.error("下载文件产生未知异常,url:"+fileInfo.getRedirectUrl()+",正在进行重试,当前次数:" + i ,e);
-            }finally {
+                i = i + 1;
+                logger.error("下载文件产生未知异常,url:" + fileInfo.getRedirectUrl() + ",正在进行重试,当前次数:" + i, e);
+            } finally {
                 if (borrow != null) {
                     proxyRestTemplatePool.returnObject(borrow);
                 }

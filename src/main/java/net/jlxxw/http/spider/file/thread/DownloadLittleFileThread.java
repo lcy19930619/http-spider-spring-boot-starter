@@ -4,6 +4,7 @@ import net.jlxxw.http.spider.file.FileInfo;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
 import net.jlxxw.http.spider.util.HttpUtils;
+import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -60,7 +62,11 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
                 byte[] body = rsp.getBody();
                 fileInfo.saveLittleFile(body);
                 return fileInfo;
-            }catch (ResourceAccessException e) {
+            } catch (HttpHostConnectException e) {
+                if ( borrow.isProxy()) {
+                    borrow.setDelete(true);
+                }
+            } catch (HttpClientErrorException e) {
                 // 个别ip访问失败者，如果是代理，直接移除
                 if (borrow != null && borrow.isProxy()) {
                     borrow.setDelete(true);

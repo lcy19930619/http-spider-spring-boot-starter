@@ -25,29 +25,6 @@ public class ProxyRestTemplatePool extends GenericObjectPool<ProxyRestTemplateOb
         setMaxWaitMillis(proxyPoolProperties.getMaxWaitMillis());
     }
 
-
-    /**
-     * 执行相关请求
-     * @throws Exception
-     */
-    public void doExecute(Consumer<ProxyRestTemplateObject> consumer) throws Exception {
-        ProxyRestTemplateObject proxyRestTemplateObject = null;
-        try {
-            proxyRestTemplateObject = borrowObject();
-            consumer.accept(proxyRestTemplateObject);
-        } catch (HttpHostConnectException | ResourceAccessException e) {
-            // 个别ip访问失败者，如果是代理，直接移除
-            if (proxyRestTemplateObject != null && proxyRestTemplateObject.isProxy()) {
-                proxyRestTemplateObject.setDelete(true);
-            }
-            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
-        } finally {
-            if (proxyRestTemplateObject != null) {
-                returnObject(proxyRestTemplateObject);
-            }
-        }
-    }
-
     /**
      * 自旋获取对象
      * @return
