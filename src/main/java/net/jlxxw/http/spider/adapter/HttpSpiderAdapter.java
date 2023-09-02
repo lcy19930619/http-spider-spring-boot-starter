@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -69,10 +70,15 @@ public class HttpSpiderAdapter implements HttpSpider {
                 if ( borrow.isProxy()) {
                     borrow.setDelete(true);
                 }
-            } catch (HttpClientErrorException e) {
-                // 个别ip访问失败者，如果是代理，直接移除
-                if (borrow != null && borrow.isProxy()) {
-                    borrow.setDelete(true);
+            } catch (ResourceAccessException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof HttpHostConnectException) {
+                    // 个别ip访问失败者，如果是代理，直接移除
+                    if (borrow != null && borrow.isProxy()) {
+                        borrow.setDelete(true);
+                    }
+                }else {
+                    logger.error("下载文件产生未知异常",e);
                 }
             } catch (Exception e) {
                 i = i+1;

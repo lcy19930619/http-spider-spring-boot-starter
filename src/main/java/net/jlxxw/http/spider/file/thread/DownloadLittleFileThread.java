@@ -66,12 +66,17 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
                 if ( borrow.isProxy()) {
                     borrow.setDelete(true);
                 }
-            } catch (HttpClientErrorException e) {
-                // 个别ip访问失败者，如果是代理，直接移除
-                if (borrow != null && borrow.isProxy()) {
-                    borrow.setDelete(true);
+            }  catch (ResourceAccessException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof HttpHostConnectException) {
+                    // 个别ip访问失败者，如果是代理，直接移除
+                    if (borrow != null && borrow.isProxy()) {
+                        borrow.setDelete(true);
+                    }
+                }else {
+                    logger.error("下载文件产生未知异常",e);
                 }
-            } catch (Exception e) {
+            }  catch (Exception e) {
                 i = i+1;
                 logger.error("下载文件产生未知异常,url:"+fileInfo.getRedirectUrl()+",正在进行重试,当前次数:" + i ,e);
             }finally {
