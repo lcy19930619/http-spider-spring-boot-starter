@@ -3,7 +3,7 @@ package net.jlxxw.http.spider.proxy;
 import java.util.function.Consumer;
 import net.jlxxw.http.spider.properties.ProxyPoolProperties;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.http.conn.HttpHostConnectException;
+import org.apache.hc.client5.http.HttpHostConnectException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;

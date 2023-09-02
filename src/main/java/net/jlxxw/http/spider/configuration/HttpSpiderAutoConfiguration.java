@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import net.jlxxw.http.spider.HttpSpider;
 import net.jlxxw.http.spider.base.AbstractCookieStore;
 import net.jlxxw.http.spider.base.AbstractProxyHostProducer;
@@ -17,18 +19,18 @@ import net.jlxxw.http.spider.properties.RestTemplateProperties;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateFactory;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
-import org.apache.http.HttpHost;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -93,8 +95,8 @@ public class HttpSpiderAutoConfiguration {
             .custom()
             //从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
             //从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
-            .setConnectionRequestTimeout(restTemplateProperties.getConnectionRequestTimeoutMillis())
-            .setConnectTimeout(restTemplateProperties.getConnectTimeoutMillis())
+            .setConnectionRequestTimeout(restTemplateProperties.getConnectionRequestTimeoutMillis(), TimeUnit.MILLISECONDS)
+            .setConnectTimeout(restTemplateProperties.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS)
             .setProxy(proxyHost)
             .build();
 

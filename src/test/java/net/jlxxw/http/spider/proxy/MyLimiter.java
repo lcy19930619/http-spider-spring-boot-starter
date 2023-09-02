@@ -2,7 +2,8 @@ package net.jlxxw.http.spider.proxy;
 
 import com.google.common.util.concurrent.RateLimiter;
 import net.jlxxw.http.spider.base.AbstractRateLimiter;
-import org.apache.http.HttpHost;
+
+import org.apache.hc.core5.http.HttpHost;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,6 +1,7 @@
 package net.jlxxw.http.spider.base;
 
-import org.apache.http.client.CookieStore;
+
+import org.apache.hc.client5.http.cookie.CookieStore;
 
 /**
  * 抽象的 cookie 处理器

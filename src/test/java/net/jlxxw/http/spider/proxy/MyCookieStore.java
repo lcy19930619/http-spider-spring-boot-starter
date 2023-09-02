@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import net.jlxxw.http.spider.base.AbstractCookieStore;
-import org.apache.http.cookie.Cookie;
+
+import org.apache.hc.client5.http.cookie.Cookie;
 import org.springframework.stereotype.Component;
 
 /**

@@ -14,9 +14,9 @@ import net.jlxxw.http.spider.properties.FileProperties;
 import net.jlxxw.http.spider.properties.HttpConcurrencyPoolProperties;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -138,7 +138,7 @@ public class DownloadFileTools {
         RequestConfig requestConfig = RequestConfig
             .custom()
             // 从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
-            .setConnectionRequestTimeout(10000)
+            .setConnectionRequestTimeout(10000,TimeUnit.MILLISECONDS)
             // 禁止重定向，方便读取 location
             .setRedirectsEnabled(false)
             .build();

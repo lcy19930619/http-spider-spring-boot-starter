@@ -1,6 +1,7 @@
 package net.jlxxw.http.spider.base;
 
-import org.apache.http.HttpHost;
+
+import org.apache.hc.core5.http.HttpHost;
 
 /**
  * 抽象限流器

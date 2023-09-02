@@ -2,7 +2,8 @@ package net.jlxxw.http.spider.util;
 
 import net.jlxxw.http.spider.base.AbstractRateLimiter;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
-import org.apache.http.HttpHost;
+
+import org.apache.hc.core5.http.HttpHost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

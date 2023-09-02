@@ -26,6 +26,24 @@
   - 分段文件下载完毕后，进行合并，还原成原始文件，读取到内存中，并移除合并后的文件
   - 分段下载的核心参数为 `http` 请求头中的 `Range`
 # 使用方法
+## maven 
+### spring boot 2.x 
+```XML
+      <dependency>
+            <groupId>net.jlxxw</groupId>
+            <artifactId>http-spider-spring-boot-starter</artifactId>
+            <version>1.0.0.20230903</version>
+        </dependency>
+```
+### spring boot 3.x
+```XML
+      <dependency>
+            <groupId>net.jlxxw</groupId>
+            <artifactId>http-spider-spring-boot-starter</artifactId>
+            <version>1.0.0.20230903-spring-boot-3</version>
+        </dependency>
+```
+
 ## 步骤一: 创建代理生产者，并交给 spring 管理
 ```java
 package net.jlxxw.http.spider.proxy;

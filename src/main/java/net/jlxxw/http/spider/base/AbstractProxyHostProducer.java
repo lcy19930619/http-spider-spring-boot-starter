@@ -1,6 +1,7 @@
 package net.jlxxw.http.spider.base;
 
-import org.apache.http.HttpHost;
+
+import org.apache.hc.core5.http.HttpHost;
 
 /**
  * http 代理生产者,需要使用者自己实现此接口，提供代理获取服务

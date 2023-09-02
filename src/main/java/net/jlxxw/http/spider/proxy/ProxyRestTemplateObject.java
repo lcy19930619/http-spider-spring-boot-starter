@@ -2,7 +2,8 @@ package net.jlxxw.http.spider.proxy;
 
 import net.jlxxw.http.spider.base.AbstractProxyHostProducer;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
-import org.apache.http.HttpHost;
+
+import org.apache.hc.core5.http.HttpHost;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.web.client.RestTemplate;
 

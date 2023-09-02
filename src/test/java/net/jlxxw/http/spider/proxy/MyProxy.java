@@ -1,7 +1,8 @@
 package net.jlxxw.http.spider.proxy;
 
 import net.jlxxw.http.spider.base.AbstractProxyHostProducer;
-import org.apache.http.HttpHost;
+
+import org.apache.hc.core5.http.HttpHost;
 import org.springframework.stereotype.Component;
 
 /**
