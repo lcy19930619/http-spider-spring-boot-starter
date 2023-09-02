@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import net.jlxxw.http.spider.file.thread.AbstractDownloadFileThread;
@@ -223,7 +224,7 @@ public class DownloadFileTools {
         FileInfo fileInfo;
         if (bigFile) {
             String cacheFilePath = fileProperties.getCacheFilePath();
-            fileInfo = new FileInfo(fileName, contentLength, share,cacheFilePath, true);
+            fileInfo = new FileInfo(fileName, contentLength, share,cacheFilePath + "/" + UUID.randomUUID(), true);
         } else {
             fileInfo = new FileInfo(fileName, contentLength);
         }

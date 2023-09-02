@@ -4,6 +4,7 @@ import net.jlxxw.http.spider.file.FileInfo;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
 import net.jlxxw.http.spider.util.HttpUtils;
+import org.apache.hc.client5.http.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -60,10 +61,20 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
                 byte[] body = rsp.getBody();
                 fileInfo.saveLittleFile(body);
                 return fileInfo;
-            }catch (ResourceAccessException e) {
+            }catch (HttpHostConnectException e) {
                 // 个别ip访问失败者，如果是代理，直接移除
-                if (borrow != null && borrow.isProxy()) {
+                if (borrow.isProxy()) {
                     borrow.setDelete(true);
+                }
+            } catch (ResourceAccessException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof HttpHostConnectException) {
+                    // 个别ip访问失败者，如果是代理，直接移除
+                    if (borrow != null && borrow.isProxy()) {
+                        borrow.setDelete(true);
+                    }
+                }else {
+                    logger.error("下载文件产生未知异常",e);
                 }
             } catch (Exception e) {
                 i = i+1;
