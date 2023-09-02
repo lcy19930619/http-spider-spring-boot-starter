@@ -74,6 +74,9 @@ public class HttpSpiderAutoConfiguration {
         HttpHost proxyHost = null;
         if (abstractProxyHostProducer != null) {
             proxyHost = abstractProxyHostProducer.producer();
+            if (proxyHost == null) {
+                logger.warn("未能获取到代理服务器地址");
+            }
         }
         boolean proxy = Objects.nonNull(proxyHost);
 

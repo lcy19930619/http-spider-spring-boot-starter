@@ -68,6 +68,10 @@ public class ProxyRestTemplateObject extends DefaultPooledObject<RestTemplate> i
         return proxy;
     }
 
+    public HttpHost getHost() {
+        return host;
+    }
+
     @Override
     public void destroy() throws Exception {
         if (abstractProxyHostProducer != null) {

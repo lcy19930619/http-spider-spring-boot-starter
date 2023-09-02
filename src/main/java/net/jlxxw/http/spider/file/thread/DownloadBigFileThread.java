@@ -4,6 +4,7 @@ import java.io.InputStream;
 import net.jlxxw.http.spider.file.FileInfo;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
+import net.jlxxw.http.spider.util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -73,7 +74,6 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
             ProxyRestTemplateObject borrow = null;
             try {
                 borrow = proxyRestTemplatePool.borrow();
-                RestTemplate template = borrow.getRestTemplate();
                 RequestCallback requestCallback = request -> {
                     HttpHeaders headers = request.getHeaders();
                     headers.putAll(header);
@@ -86,7 +86,7 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                 };
                 logger.info("多线程下载:{},index:{}" ,fileInfo.getFileName(),index);
                 header.set(HttpHeaders.RANGE, "bytes=" + start + "-" + end);
-                template.execute(fileInfo.getRedirectUrl(), HttpMethod.GET, requestCallback, responseExtractor);
+                HttpUtils.execute(borrow,fileInfo.getRedirectUrl(), HttpMethod.GET, requestCallback, responseExtractor);
                 return fileInfo;
             }catch (ResourceAccessException e) {
                 // 个别ip访问失败者，如果是代理，直接移除

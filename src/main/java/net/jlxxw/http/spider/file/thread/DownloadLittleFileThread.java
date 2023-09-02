@@ -3,12 +3,14 @@ package net.jlxxw.http.spider.file.thread;
 import net.jlxxw.http.spider.file.FileInfo;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplateObject;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
+import net.jlxxw.http.spider.util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,8 +56,7 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
             ProxyRestTemplateObject borrow = null;
             try {
                 borrow = proxyRestTemplatePool.borrow();
-                RestTemplate template = borrow.getRestTemplate();
-                ResponseEntity<byte[]> rsp = template.exchange(fileInfo.getRedirectUrl(), HttpMethod.GET, new HttpEntity<>(header), byte[].class);
+                ResponseEntity<byte[]> rsp = HttpUtils.exchange(borrow,fileInfo.getRedirectUrl(), HttpMethod.GET, new HttpEntity<>(header), byte[].class);
                 byte[] body = rsp.getBody();
                 fileInfo.saveLittleFile(body);
                 return fileInfo;

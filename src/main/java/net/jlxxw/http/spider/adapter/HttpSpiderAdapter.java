@@ -6,6 +6,7 @@ import net.jlxxw.http.spider.HttpSpider;
 import net.jlxxw.http.spider.file.DownloadFileTools;
 import net.jlxxw.http.spider.file.FileInfo;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
+import net.jlxxw.http.spider.util.HttpUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -53,8 +54,7 @@ public class HttpSpiderAdapter implements HttpSpider {
     @Override
     public void html(String url, HttpHeaders headers, Consumer<String> htmlConsumer) throws Exception {
         proxyRestTemplatePool.doExecute((proxy)->{
-            RestTemplate template = proxy.getRestTemplate();
-            ResponseEntity<String> exchange = template.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+            ResponseEntity<String> exchange = HttpUtils.exchange(proxy,url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
             htmlConsumer.accept(exchange.getBody());
         });
     }
