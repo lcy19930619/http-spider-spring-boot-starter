@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.*;
 
 /**
@@ -100,6 +101,16 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                     }
                 }else {
                     logger.error("下载文件产生未知异常",e);
+                }
+            }catch (HttpClientErrorException e) {
+                HttpStatus statusCode = e.getStatusCode();
+                if (statusCode.value() == 403) {
+                    // 个别ip访问失败者，如果是代理，直接移除
+                    if (borrow != null && borrow.isProxy()) {
+                        borrow.setDelete(true);
+                    }
+                }else {
+                    throw e;
                 }
             } catch (Exception e) {
                 i = i + 1;
