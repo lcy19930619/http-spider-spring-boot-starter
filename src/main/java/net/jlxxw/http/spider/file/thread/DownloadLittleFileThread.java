@@ -7,11 +7,9 @@ import net.jlxxw.http.spider.util.HttpUtils;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -76,7 +74,17 @@ class DownloadLittleFileThread extends AbstractDownloadFileThread {
                 }else {
                     logger.error("下载文件产生未知异常",e);
                 }
-            } catch (Exception e) {
+            }catch (HttpClientErrorException e) {
+                HttpStatusCode statusCode = e.getStatusCode();
+                if (statusCode.value() == 403) {
+                    // 个别ip访问失败者，如果是代理，直接移除
+                    if (borrow != null && borrow.isProxy()) {
+                        borrow.setDelete(true);
+                    }
+                }else {
+                    throw e;
+                }
+            }catch (Exception e) {
                 i = i+1;
                 logger.error("下载文件产生未知异常,url:"+fileInfo.getRedirectUrl()+",正在进行重试,当前次数:" + i ,e);
             }finally {
