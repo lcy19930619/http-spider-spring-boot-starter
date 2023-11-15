@@ -79,7 +79,9 @@ public class DownloadFileTools {
         HttpHeaders responseHeader = readLength(url, httpHeader);
 
         FileInfo info = createFileInfo(responseHeader);
-
+        if (StringUtils.isBlank(info.getRedirectUrl())) {
+            info.setRedirectUrl(url);
+        }
         long contentLength = info.getLength();
 
         //开启线程
