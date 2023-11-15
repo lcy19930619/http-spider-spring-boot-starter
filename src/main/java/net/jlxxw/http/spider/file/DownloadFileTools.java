@@ -80,6 +80,10 @@ public class DownloadFileTools {
 
         FileInfo info = createFileInfo(responseHeader);
 
+        String redirectUrl = info.getRedirectUrl();
+        if (StringUtils.isBlank(redirectUrl)){
+            info.setRedirectUrl(url);
+        }
         long contentLength = info.getLength();
 
         //开启线程
