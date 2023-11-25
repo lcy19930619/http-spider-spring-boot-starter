@@ -60,7 +60,8 @@ public class DownloadFileTools {
      * @param beanFactory
      */
     public DownloadFileTools(ThreadPoolTaskExecutor httpDownloadExecutor, BeanFactory beanFactory,
-        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,ProxyRestTemplatePool proxyRestTemplatePool) {
+        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,ProxyRestTemplatePool proxyRestTemplatePool,FileInterceptor fileInterceptor) {
+        this.fileInterceptor = fileInterceptor;
         this.httpDownloadExecutor = httpDownloadExecutor;
         this.fileProperties = fileProperties;
         this.maxPoolSize = httpConcurrencyPoolProperties.getMax();
@@ -89,7 +90,7 @@ public class DownloadFileTools {
         long contentLength = info.getLength();
 
         boolean allowDownload = fileInterceptor.allowDownload(contentLength);
-        if (allowDownload) {
+        if (!allowDownload) {
             info.setFail(true);
             return info;
         }

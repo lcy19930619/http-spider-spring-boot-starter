@@ -65,7 +65,7 @@ public class HttpSpiderAutoConfiguration {
 
     @Bean
     public ProxyRestTemplatePool proxyRestTemplatePool(ProxyRestTemplateFactory proxyRestTemplateFactory,
-        ProxyPoolProperties proxyPoolProperties) {
+                                                       ProxyPoolProperties proxyPoolProperties) {
         logger.info("HttpSpider ProxyRestTemplatePool created");
         return new ProxyRestTemplatePool(proxyRestTemplateFactory, proxyPoolProperties);
     }
@@ -73,8 +73,8 @@ public class HttpSpiderAutoConfiguration {
     @Bean
     @Scope("prototype")
     public ProxyRestTemplateObject spiderProxyRestTemplateObject(RestTemplateProperties restTemplateProperties,
-        @Autowired(required = false) AbstractProxyHostProducer abstractProxyHostProducer,
-        @Autowired(required = false) AbstractCookieStore abstractCookieStore) {
+                                                                 @Autowired(required = false) AbstractProxyHostProducer abstractProxyHostProducer,
+                                                                 @Autowired(required = false) AbstractCookieStore abstractCookieStore) {
 
         HttpHost proxyHost = null;
         if (abstractProxyHostProducer != null) {
@@ -86,40 +86,40 @@ public class HttpSpiderAutoConfiguration {
         boolean proxy = Objects.nonNull(proxyHost);
 
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
-            .register("http", PlainConnectionSocketFactory.getSocketFactory())
-            .register("https", SSLConnectionSocketFactory.getSocketFactory())
-            .build();
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .register("https", SSLConnectionSocketFactory.getSocketFactory())
+                .build();
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registry);
         //设置整个连接池最大连接数
         connectionManager.setMaxTotal(restTemplateProperties.getMaxTotal());
         //路由是对maxTotal的细分
         connectionManager.setDefaultMaxPerRoute(restTemplateProperties.getDefaultMaxPerRoute());
         RequestConfig requestConfig = RequestConfig
-            .custom()
-            //从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
-            //从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
-            .setConnectionRequestTimeout(restTemplateProperties.getConnectionRequestTimeoutMillis(), TimeUnit.MILLISECONDS)
-            .setConnectTimeout(restTemplateProperties.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS)
-            .setProxy(proxyHost)
-            .build();
+                .custom()
+                //从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
+                //从连接池中获取连接的超时时间，超过该时间未拿到可用连接，会抛出org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
+                .setConnectionRequestTimeout(restTemplateProperties.getConnectionRequestTimeoutMillis(), TimeUnit.MILLISECONDS)
+                .setConnectTimeout(restTemplateProperties.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS)
+                .setProxy(proxyHost)
+                .build();
 
         CookieStore cookieStore = Objects.isNull(abstractCookieStore) ? new BasicCookieStore() : abstractCookieStore;
         HttpClient client = HttpClientBuilder.create()
-            .setDefaultRequestConfig(requestConfig)
-            .setConnectionManager(connectionManager)
-            .setDefaultCookieStore(cookieStore)
-            .build();
+                .setDefaultRequestConfig(requestConfig)
+                .setConnectionManager(connectionManager)
+                .setDefaultCookieStore(cookieStore)
+                .build();
 
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(client));
 
         logger.info("created ProxyRestTemplateObject ,proxy model:{}", proxy);
 
-        return new ProxyRestTemplateObject(restTemplate, abstractProxyHostProducer,proxyHost);
+        return new ProxyRestTemplateObject(restTemplate, abstractProxyHostProducer, proxyHost);
     }
 
     @Bean
     public ThreadPoolTaskExecutor httpConcurrencyDownloadExecutor(
-        HttpConcurrencyPoolProperties httpConcurrencyPoolProperties) {
+            HttpConcurrencyPoolProperties httpConcurrencyPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // 核心池大小
         executor.setCorePoolSize(httpConcurrencyPoolProperties.getMin());
@@ -138,18 +138,21 @@ public class HttpSpiderAutoConfiguration {
 
     @Bean
     public DownloadFileTools downloadFileTools(ThreadPoolTaskExecutor httpConcurrencyDownloadExecutor,
-        BeanFactory beanFactory,
-        FileProperties fileProperties, HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,ProxyRestTemplatePool proxyRestTemplatePool) {
-        return new DownloadFileTools(httpConcurrencyDownloadExecutor, beanFactory, fileProperties, httpConcurrencyPoolProperties,proxyRestTemplatePool);
+                                               BeanFactory beanFactory,
+                                               FileInterceptor fileInterceptor,
+                                               FileProperties fileProperties,
+                                               HttpConcurrencyPoolProperties httpConcurrencyPoolProperties,
+                                               ProxyRestTemplatePool proxyRestTemplatePool) {
+        return new DownloadFileTools(httpConcurrencyDownloadExecutor, beanFactory, fileProperties, httpConcurrencyPoolProperties, proxyRestTemplatePool, fileInterceptor);
     }
 
     @Bean
     public HttpSpider httpSpider(ProxyRestTemplatePool proxyRestTemplatePool, DownloadFileTools downloadFileTools) {
-        return new HttpSpiderAdapter(proxyRestTemplatePool,downloadFileTools);
+        return new HttpSpiderAdapter(proxyRestTemplatePool, downloadFileTools);
     }
 
     @Bean
-    public ByteArrayHttpMessageConverter spiderDownloadFileHttpMessageConverter(FileProperties fileProperties){
+    public ByteArrayHttpMessageConverter spiderDownloadFileHttpMessageConverter(FileProperties fileProperties) {
         ByteArrayHttpMessageConverter byteArrayHttpMessageConverter = new ByteArrayHttpMessageConverter();
         List<MediaType> list = new ArrayList<MediaType>();
         list.add(MediaType.APPLICATION_OCTET_STREAM);
