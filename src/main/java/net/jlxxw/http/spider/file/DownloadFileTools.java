@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import net.jlxxw.http.spider.file.thread.AbstractDownloadFileThread;
+import net.jlxxw.http.spider.interceptor.FileInterceptor;
 import net.jlxxw.http.spider.properties.FileProperties;
 import net.jlxxw.http.spider.properties.HttpConcurrencyPoolProperties;
 import net.jlxxw.http.spider.proxy.ProxyRestTemplatePool;
@@ -40,6 +41,7 @@ public class DownloadFileTools {
      */
     private int maxPoolSize;
 
+    private FileInterceptor fileInterceptor;
     /**
      * 并发下载线程池
      */
@@ -86,6 +88,11 @@ public class DownloadFileTools {
         }
         long contentLength = info.getLength();
 
+        boolean allowDownload = fileInterceptor.allowDownload(contentLength);
+        if (allowDownload) {
+            info.setFail(true);
+            return info;
+        }
         //开启线程
         long threadNum = threadNum(contentLength);
 
@@ -222,6 +229,9 @@ public class DownloadFileTools {
             fileName = URLDecoder.decode(fileName, String.valueOf(StandardCharsets.ISO_8859_1));
         }
         long contentLength = headers.getContentLength();
+
+
+
 
         boolean bigFile = isBigFile(contentLength);
         int share = share(contentLength);

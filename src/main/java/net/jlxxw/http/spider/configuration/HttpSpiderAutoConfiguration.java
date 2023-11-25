@@ -12,6 +12,8 @@ import net.jlxxw.http.spider.base.AbstractCookieStore;
 import net.jlxxw.http.spider.base.AbstractProxyHostProducer;
 import net.jlxxw.http.spider.adapter.HttpSpiderAdapter;
 import net.jlxxw.http.spider.file.DownloadFileTools;
+import net.jlxxw.http.spider.interceptor.DefaultFileInterceptor;
+import net.jlxxw.http.spider.interceptor.FileInterceptor;
 import net.jlxxw.http.spider.properties.FileProperties;
 import net.jlxxw.http.spider.properties.HttpConcurrencyPoolProperties;
 import net.jlxxw.http.spider.properties.ProxyPoolProperties;
@@ -35,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Scope;
@@ -157,6 +160,13 @@ public class HttpSpiderAutoConfiguration {
         }
         byteArrayHttpMessageConverter.setSupportedMediaTypes(list);
         return byteArrayHttpMessageConverter;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FileInterceptor.class)
+    public FileInterceptor fileInterceptor() {
+        logger.info("启用默认下载拦截器，允许全部文件下载");
+        return new DefaultFileInterceptor();
     }
 
 }
