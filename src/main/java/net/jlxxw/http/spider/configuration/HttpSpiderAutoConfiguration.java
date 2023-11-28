@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -117,7 +118,7 @@ public class HttpSpiderAutoConfiguration {
         return new ProxyRestTemplateObject(restTemplate, abstractProxyHostProducer, proxyHost);
     }
 
-    @Bean
+    @Bean("httpConcurrencyDownloadExecutor")
     public ThreadPoolTaskExecutor httpConcurrencyDownloadExecutor(
             HttpConcurrencyPoolProperties httpConcurrencyPoolProperties) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -137,7 +138,7 @@ public class HttpSpiderAutoConfiguration {
     }
 
     @Bean
-    public DownloadFileTools downloadFileTools(ThreadPoolTaskExecutor httpConcurrencyDownloadExecutor,
+    public DownloadFileTools downloadFileTools(@Qualifier("httpConcurrencyDownloadExecutor") ThreadPoolTaskExecutor httpConcurrencyDownloadExecutor,
                                                BeanFactory beanFactory,
                                                FileInterceptor fileInterceptor,
                                                FileProperties fileProperties,
