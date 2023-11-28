@@ -104,7 +104,7 @@ class DownloadBigFileThread extends AbstractDownloadFileThread {
                 }
             } catch (HttpClientErrorException e) {
                 HttpStatusCode statusCode = e.getStatusCode();
-                if (statusCode.value() == 403) {
+                if (statusCode.value() == 403|| statusCode.value() == 418) {
                     // 个别ip访问失败者，如果是代理，直接移除
                     if (borrow != null && borrow.isProxy()) {
                         borrow.setDelete(true);
